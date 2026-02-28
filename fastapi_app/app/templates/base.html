@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="description" content="Inferno Co.">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Inferno Colombia</title>
+
+  <link href="https://fonts.googleapis.com/css?family=Muli:300,400,500,600,700,800,900&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css?family=Sofia&display=swap" rel="stylesheet">
+
+  <link rel="icon" href="/img/icon.svg">
+
+  <link rel="stylesheet" href="/css/bootstrap.min.css" type="text/css">
+  <link rel="stylesheet" href="/css/font-awesome.min.css" type="text/css">
+  <link rel="stylesheet" href="/css/themify-icons.css" type="text/css">
+  <link rel="stylesheet" href="/css/elegant-icons.css" type="text/css">
+  <link rel="stylesheet" href="/css/owl.carousel.min.css" type="text/css">
+  <link rel="stylesheet" href="/css/slicknav.min.css" type="text/css">
+  <link rel="stylesheet" href="/css/style.css" type="text/css">
+  <link rel="stylesheet" href="/css/dark-mode.css" type="text/css">
+</head>
+<body>
+
+  <div id="preload">
+    <div class="load"></div>
+  </div>
+
+  <header class="header-section">
+    <div class="header-top" id="top">
+      <div class="container">
+        <div class="f-left">
+          <div class="top-social">
+            <a href="https://www.facebook.com/" target="_blank"><i class="ti-facebook"></i></a>
+            <a href="https://www.instagram.com/?hl=es" target="_blank"><i class="ti-instagram"></i></a>
+
+            <label class="theme-toggle">
+              <input type="checkbox" id="theme-toggle">
+              <span class="theme-slider"></span>
+            </label>
+          </div>
+        </div>
+
+        <div class="f-right">
+          <ul class="nav-right">
+            <li class="user-icon">
+              <div class="login-panel">
+                <i class="fa fa-user" style="font-size:20px"></i>
+              </div>
+              <div class="login-hover">
+                <div class="insidelog">
+                  {% if not is_logged_in %}
+                    <a href="/login" class="btn logbtn" style="width: 200px; height:40px">Iniciar sesión</a>
+                  {% else %}
+                    <a href="/logout" class="btn logbtn" style="width: 200px; height:40px">Cerrar sesión</a>
+                  {% endif %}
+                </div>
+
+                {% if not is_logged_in %}
+                  <div class="insidelog">
+                    <span class="small">o </span><a href="/register" class="small">Regístrate ahora</a>
+                  </div>
+                {% else %}
+                  <div class="insidelog" style="border-top: solid 0.2px #e5e5e5;">
+                    <a href="/account?orders=1" class="btn btn-dark" style="color:white;margin:4px 0">Mi cuenta</a>
+                  </div>
+                {% endif %}
+              </div>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="container">
+      <div class="inner-header">
+        <div class="row">
+          <div class="col-md-3 logo">
+            <a href="/"><span>Inferno Colombia</span></a>
+          </div>
+
+          <div class="col-md-6">
+            <form method="post" action="/search">
+              <div class="input-group">
+                <input type="text" name="search" placeholder="Busca en nuestra tienda" required>
+                <button type="submit"><i class="ti-search"></i></button>
+              </div>
+            </form>
+          </div>
+
+          <div class="col-md-3 text-right" style="visibility: {% if not is_logged_in %}hidden{% else %}visible{% endif %}">
+            <ul class="nav-right">
+              <li class="cart-icon">
+                <a href="/cart">
+                  <i class="icon_bag_alt"></i>
+                  <span>{{ cart_items_count }}</span>
+                </a>
+                <div class="cart-hover">
+                  <div class="select-items">
+                    <table>
+                      <tbody>
+                        {% if cart_preview_items|length == 0 %}
+                          <tr><td colspan="3"><p style="text-align:center; font-weight:500;color:#fe4231">Carrito Vacío</p></td></tr>
+                        {% else %}
+                          {% for it in cart_preview_items %}
+                            <tr>
+                              <td class="si-pic">
+                                <img src="/img/products/{{ it.product_img1 }}" alt="{{ it.product_title }}" style="max-height:70px">
+                              </td>
+                              <td class="si-text">
+                                <div class="product-selected">
+                                  <p>COP {{ it.product_price }} x {{ it.qty }}</p>
+                                  <h6>{{ it.product_title }}</h6>
+                                </div>
+                              </td>
+                              <td class="si-close">
+                                <a href="/cart/remove/{{ it.products_id }}"><i class="ti-close" style="color:black"></i></a>
+                              </td>
+                            </tr>
+                          {% endfor %}
+                        {% endif %}
+                      </tbody>
+                    </table>
+                  </div>
+                  <div class="select-total">
+                    <span>Total:</span>
+                    <h5>COP {{ cart_total_price }}</h5>
+                  </div>
+                  <div class="select-button">
+                    <a href="/cart" class="primary-btn view-card">Ver todos los productos</a>
+                    <a href="/checkout" class="primary-btn checkout-btn">Ir a pagar</a>
+                  </div>
+                </div>
+              </li>
+              <li class="cart-price">COP {{ cart_total_price }}</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="nav-item">
+      <div class="container">
+        <div class="nav-depart">
+          <div class="depart-btn">
+            <i class="ti-menu"></i>
+            <span>Todas las categorías</span>
+            <ul class="depart-hover">
+              {% for pc in prod_categories %}
+                <li><a href="/shop?p_cat_id={{ pc.p_cat_id }}">{{ pc.p_cat_title }}</a></li>
+              {% endfor %}
+            </ul>
+          </div>
+        </div>
+
+        <nav class="nav-menu mobile-menu">
+          <ul>
+            <li class="{% if active == 'Inicio' %}active{% endif %}"><a href="/">Inicio</a></li>
+            <li class="{% if active == 'Tienda' %}active{% endif %}"><a href="/shop">Tienda</a></li>
+            <li class="{% if active == 'Contacto' %}active{% endif %}"><a href="/contact">Contacto</a></li>
+          </ul>
+        </nav>
+        <div id="mobile-menu-wrap"></div>
+      </div>
+    </div>
+  </header>
+
+  {% block content %}{% endblock %}
+
+  <footer class="footer-section">
+    <div class="container">
+      <div class="row" style="padding-bottom: 40px;">
+        <div class="col-lg-3">
+          <div class="footer-left">
+            <div class="footer-logo">
+              <a href="/"><span>Inferno Colombia</span></a>
+            </div>
+            <ul>
+              <li>+57 304 225 6789</li>
+              <li>InfernoColombia@gmail.com</li>
+              <li>Bogotá, Av. Chiminangos, local Apto 2, Local C</li>
+            </ul>
+            <div class="footer-social">
+              <a href="https://www.facebook.com/" target="_blank"><i class="fa fa-facebook"></i></a>
+              <a href="https://www.instagram.com/?hl=es" target="_blank"><i class="fa fa-instagram"></i></a>
+              <a href="https://www.pinterest.com/" target="_blank"><i class="fa fa-pinterest"></i></a>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-lg-2 offset-lg-1">
+          <div class="footer-widget">
+            <h5>Información</h5>
+            <ul>
+              <li><a href="/">Sobre Nosotros</a></li>
+              <li><a href="/contact">Contacto</a></li>
+              <li><a href="/">Política de Privacidad</a></li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="col-lg-2">
+          <div class="footer-widget" style="display: {% if active in ['Registro','Iniciar Sesión'] %}none{% else %}block{% endif %};">
+            <h5>Mi Cuenta</h5>
+            <ul>
+              {% if is_logged_in %}
+                <li><a href="/account?orders=1">Mis Pedidos</a></li>
+              {% endif %}
+              <li>
+                <a href="{% if is_logged_in %}/cart{% else %}/login{% endif %}">Carrito de Compras</a>
+              </li>
+              <li>
+                <a href="{% if is_logged_in %}/checkout{% else %}/login{% endif %}">Finalizar Compra</a>
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="col-lg-4">
+          <div class="newslatter-item">
+            <h5>Mantente en contacto</h5>
+            <p>Recibe actualizaciones y ofertas especiales por correo electrónico.</p>
+            <form action="/" class="subscribe-form">
+              <input type="text" placeholder="Ingresa tu correo electrónico">
+              <button type="button">Suscribirse</button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <script src="/js/jquery-3.3.1.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/2.4.4/umd/popper.min.js" crossorigin="anonymous"></script>
+  <script src="/js/bootstrap.min.js"></script>
+  <script src="/js/jquery.zoom.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/bootbox.js/5.4.0/bootbox.min.js" crossorigin="anonymous"></script>
+  <script src="/js/jquery.slicknav.js"></script>
+  <script src="/js/owl.carousel.min.js"></script>
+  <script src="/js/main.js"></script>
+  <script src="/js/dark-mode.js"></script>
+
+  {% if flash %}
+    <script>
+      bootbox.alert({ message: "{{ flash|e }}", backdrop: true });
+    </script>
+  {% endif %}
+
+  {% block extra_js %}{% endblock %}
+</body>
+</html>

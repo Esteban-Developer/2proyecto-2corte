@@ -1,0 +1,91 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="breacrumb-section">
+  <div class="container">
+    <div class="row">
+      <div class="col-lg-12">
+        <div class="breadcrumb-text">
+          <a href="/"><i class="fa fa-home"></i> Inicio</a>
+          <a href="/shop">Tienda</a>
+          {% if filter_title %}
+            <span>{{ filter_title }}</span>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<section class="product-shop spad">
+  <div class="container">
+    <div class="row">
+      <div class="col-lg-3 col-md-6 col-sm-8 order-2 order-lg-1 produts-sidebar-filter">
+        <div class="filter-widget">
+          <h4 class="fw-title">Categorías</h4>
+          <ul class="filter-catagories">
+            {% for c in categories %}
+              <li class="hovclass"><a href="/shop?cat_id={{ c.cat_id }}">{{ c.cat_title }}</a></li>
+            {% endfor %}
+          </ul>
+        </div>
+      </div>
+
+      <div class="col-lg-9 order-1 order-lg-2">
+        <div class="product-list">
+          {% if filter_desc %}
+            <div class="card" style="margin-bottom:15px;">
+              <div class="card-body">{{ filter_desc }}</div>
+            </div>
+          {% endif %}
+
+          <div class="row">
+            {% if products|length == 0 %}
+              <div class="col-12">
+                <div class="card" style="font-weight:bold; color:#fe4231">
+                  <div class="card-body">No hay Productos Disponibles</div>
+                </div>
+              </div>
+            {% else %}
+              {% for p in products %}
+                <div class="col-lg-4 col-sm-6">
+                  <div class="product-item">
+                    <div class="pi-pic" style="max-height:350px">
+                      <img src="/img/products/{{ p.product_img1 }}" alt="{{ p.product_title }}">
+                      <ul>
+                        <li class="quick-view">
+                          <a href="/product/{{ p.products_id }}" style="background:#fe4231;color:white">Ver Detalles</a>
+                        </li>
+                      </ul>
+                    </div>
+                    <div class="pi-text">
+                      <div class="catagory-name"></div>
+                      <a href="/product/{{ p.products_id }}"><h5>{{ p.product_title }}</h5></a>
+                      <div class="product-price">COP {{ p.product_price }}</div>
+                    </div>
+                  </div>
+                </div>
+              {% endfor %}
+            {% endif %}
+          </div>
+
+          {% if total_pages > 1 and p_cat_id is none and cat_id is none %}
+            <div class="row" style="display:flex;justify-content:center; padding:14px">
+              <ul class="pagination">
+                <li class="page-item"><a class="page-link" href="/shop?page=1">Primera</a></li>
+                {% for i in range(2, total_pages) %}
+                  <li class="page-item"><a class="page-link" href="/shop?page={{ i }}">{{ i }}</a></li>
+                {% endfor %}
+                <li class="page-item"><a class="page-link" href="/shop?page={{ total_pages }}">Última</a></li>
+              </ul>
+            </div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+{% endblock %}
+

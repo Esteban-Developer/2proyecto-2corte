@@ -1,0 +1,99 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="row" style="margin:0">
+  <div class="col-lg-12">
+    <div style="font-size: 28px;background-color: #e6e6e6;text-align: center;padding: 8px 0;margin-bottom: 20px;box-shadow: 0 -20px 15px -10px rgba(155, 155, 155, 0.3) inset,0 20px 15px -10px rgba(155, 155, 155, 0.3) inset,0 0 10px rgba(0, 0, 0, 0.1);">
+      <i class="fa fa-dashboard fa-fw"></i> Dashboard
+    </div>
+  </div>
+</div>
+
+<div class="container" style="padding-bottom:40px;">
+  <div class="panel panel-default">
+    <div class="panel-heading">
+      <h3 class="panel-title"><i class="fa fa-money fa-fw"></i> Insert Products</h3>
+    </div>
+    <div class="panel-body">
+      <form method="post" class="form-horizontal" enctype="multipart/form-data" action="/admin/insert-product">
+
+        <div class="form-group">
+          <label class="col-md-3 control-label">Product Title/Name</label>
+          <div class="col-md-6">
+            <input type="text" class="form-control" name="product_title" required>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="col-md-3 control-label">Product Category</label>
+          <div class="col-md-6">
+            <select class="form-control" name="p_cat_id" required>
+              <option value="" selected>Selecciona una categoría de producto</option>
+              {% for pc in all_product_categories %}
+                <option value="{{ pc.p_cat_id }}">{{ pc.p_cat_title }}</option>
+              {% endfor %}
+            </select>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="col-md-3 control-label">Category</label>
+          <div class="col-md-6">
+            <select class="form-control" name="cat_id" required>
+              <option value="" selected>Selecciona una categoría</option>
+              {% for c in all_categories %}
+                <option value="{{ c.cat_id }}">{{ c.cat_title }}</option>
+              {% endfor %}
+            </select>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="col-md-3 control-label">Product Image # 1</label>
+          <div class="col-md-6">
+            <input type="file" class="form-control" name="product_img1" required>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="col-md-3 control-label">Product Image # 2</label>
+          <div class="col-md-6">
+            <input type="file" class="form-control" name="product_img2" required>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="col-md-3 control-label">Product Price</label>
+          <div class="col-md-6">
+            <input type="number" class="form-control" name="product_price" required>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="col-md-3 control-label">Product Keywords</label>
+          <div class="col-md-6">
+            <input type="text" class="form-control" name="product_keywords" required>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="col-md-3 control-label">Product Description</label>
+          <div class="col-md-6">
+            <textarea class="form-control" name="product_desc" cols="19" rows="6"></textarea>
+          </div>
+        </div>
+
+        <div class="form-group" style="display: flex;justify-content:center">
+          <div class="col-md-3">
+            <input name="submit" type="submit" class="btn btn-primary form-control" value="Insert Product">
+          </div>
+        </div>
+
+      </form>
+    </div>
+  </div>
+</div>
+
+{% endblock %}
+

@@ -1,0 +1,136 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+  <section class="hero-section">
+    <div class="hero-items owl-carousel">
+      {% for s in slides %}
+        <div class="single-hero-items set-bg" data-setbg="/img/{{ s.slide_image }}">
+          <div class="container">
+            <div class="row">
+              <div class="col-lg-5">
+                <h1 {% if loop.index > 1 %}style="color:white"{% endif %}>{{ s.slide_heading }}</h1>
+                <p {% if loop.index > 1 %}style="color:white"{% endif %}>{{ s.slide_text }}</p>
+                <a href="/shop" class="primary-btn">Ver productos</a>
+              </div>
+            </div>
+            {% if loop.first %}
+              <div class="off-card">
+                <h2>Hasta<span>60%</span></h2>
+              </div>
+            {% endif %}
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  </section>
+
+  <div class="banner-section spad">
+    <div class="container-fluid">
+      <div class="row">
+        <div class="col-lg-4">
+          <a href="/shop?cat_id=1">
+            <div class="single-banner">
+              <img src="/img/banner-1.png" alt="Hombres">
+              <div class="inner-text"><h4>Hombres</h4></div>
+            </div>
+          </a>
+        </div>
+        <div class="col-lg-4">
+          <a href="/shop?cat_id=2">
+            <div class="single-banner">
+              <img src="/img/banner-2.png" alt="Mujeres">
+              <div class="inner-text"><h4>Mujeres</h4></div>
+            </div>
+          </a>
+        </div>
+        <div class="col-lg-4">
+          <a href="/shop?cat_id=3">
+            <div class="single-banner">
+              <img src="/img/banner-3.png" alt="Niños">
+              <div class="inner-text"><h4>Niños</h4></div>
+            </div>
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <section class="women-banner spad">
+    <div class="container-fluid">
+      <div class="row">
+        <div class="col-lg-3">
+          <div class="product-large set-bg" data-setbg="/img/women-large.jpg">
+            <h2>Mujeres</h2>
+            <a href="/shop?cat_id=2">Descubrir más</a>
+          </div>
+        </div>
+        <div class="col-lg-8 offset-lg-1">
+          <div class="filter-control"><h3>Productos destacados</h3></div>
+          <div class="product-slider owl-carousel">
+            {% for p in women_products %}
+              <div class="product-item">
+                <div class="pi-pic" style="max-height:300px">
+                  <img src="/img/products/{{ p.product_img1 }}" alt="{{ p.product_title }}">
+                  <ul>
+                    <li class="quick-view">
+                      <a href="/product/{{ p.products_id }}" style="background:#fe4231;color:white">Ver Detalles</a>
+                    </li>
+                  </ul>
+                </div>
+                <div class="pi-text">
+                  <a href="/product/{{ p.products_id }}"><h5>{{ p.product_title }}</h5></a>
+                  <div class="product-price">COP {{ p.product_price }}</div>
+                </div>
+              </div>
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="man-banner spad">
+    <div class="container-fluid">
+      <div class="row">
+        <div class="col-lg-8">
+          <div class="filter-control"><h3>Productos destacados</h3></div>
+          <div class="product-slider owl-carousel">
+            {% for p in men_products %}
+              <div class="product-item">
+                <div class="pi-pic" style="max-height:300px">
+                  <img src="/img/products/{{ p.product_img1 }}" alt="{{ p.product_title }}">
+                  <ul>
+                    <li class="quick-view">
+                      <a href="/product/{{ p.products_id }}" style="background:#fe4231;color:white">Ver Detalles</a>
+                    </li>
+                  </ul>
+                </div>
+                <div class="pi-text">
+                  <a href="/product/{{ p.products_id }}"><h5>{{ p.product_title }}</h5></a>
+                  <div class="product-price">COP {{ p.product_price }}</div>
+                </div>
+              </div>
+            {% endfor %}
+          </div>
+        </div>
+        <div class="col-lg-3 offset-lg-1">
+          <div class="product-large set-bg m-large" data-setbg="/img/men-large.jpg">
+            <h2>Hombres</h2>
+            <a href="/shop?cat_id=1">Descubrir más</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+{% endblock %}
+
+{% block extra_js %}
+  {% if request.query_params.get('stat') %}
+    <script>
+      bootbox.alert({ message: "¡Bienvenido! Has iniciado sesión correctamente.", backdrop: true });
+    </script>
+  {% endif %}
+{% endblock %}
+

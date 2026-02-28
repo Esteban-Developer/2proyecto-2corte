@@ -1,0 +1,156 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div style="overflow: hidden;">
+  <div class="breacrumb-section">
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-12">
+          <div class="breadcrumb-text product-more">
+            <a href="/"><i class="fa fa-home"></i> Inicio</a>
+            <a href="/shop">Tienda</a>
+            <span>Detalles del Producto</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <section class="product-shop spad page-details">
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-3">
+          <div class="filter-widget">
+            <h4 class="fw-title">Categorías</h4>
+            <ul class="filter-catagories">
+              {% for c in categories %}
+                <li class="hovclass"><a href="/shop?cat_id={{ c.cat_id }}">{{ c.cat_title }}</a></li>
+              {% endfor %}
+            </ul>
+          </div>
+        </div>
+
+        <div class="col-lg-9">
+          <div class="row">
+            <div class="col-lg-6" style="margin:0 auto">
+              <div class="product-pic-zoom col-md-8" style="max-height:400px;margin: 0 0 30px 0">
+                <img class="product-big-img" src="/img/products/{{ product.product_img1 }}" alt="{{ product.product_title }}">
+                <div class="zoom-icon"><i class="fa fa-search-plus"></i></div>
+              </div>
+              <div class="product-thumbs">
+                <div class="product-thumbs-track ps-slider owl-carousel">
+                  <div class="pt active" data-imgbigurl="/img/products/{{ product.product_img1 }}">
+                    <img src="/img/products/{{ product.product_img1 }}" alt="{{ product.product_title }}">
+                  </div>
+                  <div class="pt" data-imgbigurl="/img/products/{{ product.product_img2 }}">
+                    <img src="/img/products/{{ product.product_img2 }}" alt="{{ product.product_title }}">
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="col-lg-6">
+              <div class="product-details">
+                <div class="pd-title">
+                  <h3>{{ product.product_title }}</h3>
+                </div>
+                <div class="pd-desc">
+                  <p>{{ product.product_desc | safe }}</p>
+                  <h4>COP {{ product.product_price }}</h4>
+                </div>
+                <ul class="pd-tags">
+                  <li><span>CATEGORÍA</span>: {{ pcat.p_cat_title if pcat else '' }}</li>
+                </ul>
+              </div>
+
+              <form action="/cart/add" method="post">
+                <input type="hidden" name="product_id" value="{{ product.products_id }}">
+
+                <div class="form-group">
+                  <div class="quantity">
+                    <div class="pro-qty">
+                      <input type="text" value="1" name="product_qty">
+                    </div>
+                  </div>
+                </div>
+
+                <div class="form-group">
+                  <div class="pd-size-choose">
+                    <div class="sc-item">
+                      <input type="radio" id="sm-size" class="form-control" name="size" value="Pequeña" required>
+                      <label for="sm-size">S</label>
+                    </div>
+                    <div class="sc-item">
+                      <input type="radio" id="md-size" class="form-control" name="size" value="Mediana">
+                      <label for="md-size">M</label>
+                    </div>
+                    <div class="sc-item">
+                      <input type="radio" id="lg-size" class="form-control" name="size" value="Grande">
+                      <label for="lg-size">L</label>
+                    </div>
+                    <div class="sc-item">
+                      <input type="radio" id="xl-size" class="form-control" name="size" value="Extra Grande">
+                      <label for="xl-size">XL</label>
+                    </div>
+                  </div>
+                  <p id="msg"></p>
+                </div>
+
+                {% if not is_logged_in %}
+                  <a href="/login" class="btn primary-btn pd-cart" style="margin-top: 20px;">Agregar al carrito</a>
+                {% else %}
+                  <button class="btn primary-btn pd-cart" id="cartbtn" style="margin-top: 20px;">Agregar al carrito</button>
+                {% endif %}
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="related-products spad">
+    <div class="container">
+      <div class="row">
+        <div class="col-lg-12">
+          <div class="section-title"><h2>Productos similares</h2></div>
+        </div>
+      </div>
+      <div class="row">
+        {% for p in related_products %}
+          <div class="col-lg-3 col-sm-6">
+            <div class="product-item">
+              <div class="pi-pic" style="max-height:300px">
+                <img src="/img/products/{{ p.product_img1 }}" alt="{{ p.product_title }}">
+                <ul>
+                  <li class="quick-view">
+                    <a href="/product/{{ p.products_id }}" style="background:#fe4231;color:white">Ver Detalles</a>
+                  </li>
+                </ul>
+              </div>
+              <div class="pi-text">
+                <a href="/product/{{ p.products_id }}"><h5>{{ p.product_title }}</h5></a>
+                <div class="product-price">COP {{ p.product_price }}</div>
+              </div>
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+</div>
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  $("#cartbtn").on('click', function() {
+    if (!$("input[name='size']").is(':checked')) {
+      $("#msg").html("<span class='alert alert-danger'>Por favor, selecciona una talla antes de continuar.</span>");
+      return false;
+    }
+  });
+</script>
+{% endblock %}
+
