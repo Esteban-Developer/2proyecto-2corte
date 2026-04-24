@@ -1,6 +1,10 @@
 ﻿#  Inferno Colombia — E-commerce Distribuido (Corte 2)
 
 <p align="center">
+  <img src="https://capsule-render.vercel.app/api?type=waving&height=220&color=0:0f172a,50:1e293b,100:334155&text=Inferno%20Colombia%20Corte%202&fontColor=ffffff&fontSize=42&animation=fadeIn&fontAlignY=38&desc=FastAPI%20%2B%20Redis%20%2B%20RabbitMQ%20%2B%20MySQL&descAlignY=58" alt="Inferno Colombia Banner" />
+</p>
+
+<p align="center">
   <img alt="FastAPI" src="https://img.shields.io/badge/FastAPI-009688?style=for-the-badge&logo=fastapi&logoColor=white" />
   <img alt="Python" src="https://img.shields.io/badge/Python-3.10+-3776AB?style=for-the-badge&logo=python&logoColor=white" />
   <img alt="MySQL" src="https://img.shields.io/badge/MySQL-4479A1?style=for-the-badge&logo=mysql&logoColor=white" />
@@ -10,112 +14,86 @@
 </p>
 
 <p align="center">
-  <b>Migración de e-commerce PHP a arquitectura distribuida con FastAPI + Redis + RabbitMQ</b>
+  <img src="https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExNmQ4bHhqaDd4N3NtbW0xMzN2cnNoOW5mbjM4N2F4ZWI5MHEzc2xkNyZlcD12MV9naWZzX3NlYXJjaCZjdD1n/l0HlNaQ6gWfllcjDO/giphy.gif" width="680" alt="Ecommerce Tech Gif" />
+</p>
+
+<p align="center">
+  <b>Migración de e-commerce PHP a una arquitectura distribuida real con FastAPI</b>
+</p>
+
+<p align="center">
+  <a href="#-instalacion-y-ejecucion"><img src="https://img.shields.io/badge/Run%20Locally-111827?style=for-the-badge&logo=rocket&logoColor=white" /></a>
+  <a href="http://127.0.0.1:8000/docs"><img src="https://img.shields.io/badge/API%20Docs-0ea5e9?style=for-the-badge&logo=swagger&logoColor=white" /></a>
+  <a href="http://localhost:15672"><img src="https://img.shields.io/badge/RabbitMQ%20Panel-f97316?style=for-the-badge&logo=rabbitmq&logoColor=white" /></a>
 </p>
 
 ---
 
-##  ¿Qué es este proyecto?
+##  ¿Qué incluye este corte?
 
-**Inferno Colombia (Corte 2)** es una evolución del e-commerce original en PHP, migrado a **Python + FastAPI** con enfoque distribuido:
-
-- Catálogo y vistas web con Jinja2
-- API REST de productos
-- Carrito y checkout
-- **Checkout asíncrono** con cola de mensajes
-- Estado de pedidos en tiempo real con Redis
-
----
-
-##  Tabla de contenido
-
-- [Arquitectura](#-arquitectura)
-- [Componentes Clave](#-componentes-clave)
-- [Flujo de Checkout Asíncrono](#-flujo-de-checkout-asíncrono)
-- [Estructura del Proyecto](#-estructura-del-proyecto)
-- [Endpoints Principales](#-endpoints-principales)
-- [Instalación y Ejecución](#-instalación-y-ejecución)
-- [Demo Rápida](#-demo-rápida)
-- [Troubleshooting](#-troubleshooting)
-- [Autores](#-autores)
+-  Front web e-commerce (Jinja2 + assets del proyecto original)
+-  API REST de catálogo (`/productos`)
+-  Checkout asíncrono real
+-  RabbitMQ para mensajería/cola de pedidos
+-  Redis como coordinador de estado de pedidos
+-  Worker en Python para procesamiento en segundo plano
 
 ---
 
 ##  Arquitectura
 
-```mermaid
-flowchart LR
-    C[Cliente Web / Swagger] --> API[FastAPI app.main]
-    API --> MQ[(RabbitMQ\norders.create)]
-    API --> R[(Redis\norder_status:{request_id})]
-    API --> DB[(MySQL\nthreaderz_store)]
+> En GitHub a veces Mermaid no renderiza según configuración. Por eso aquí va como **imagen estática**, para que siempre se vea.
 
-    W[Worker FastAPI\napp.worker] --> MQ
-    W --> DB
-    W --> R
-```
+<p align="center">
+  <img src="https://mermaid.ink/img/pako:eNp1kk1PwzAMhv9KlBOhLQSHhI3Lsu2M0wRw4IY4bhM2qiq7sm1eUfXfSUrbbjA8Qnd8fPy29xyMM4I1qeBo7De4BaMFdM6qcQfH9HJYIPqRxZ6z3f2MlpV4FVhSm2Jv1mIia0K6WyXQn2M0OQ1xZo2q0ON5n0kzb8xjkrQpp3Px8hcjXf8fI2mW9M8IGVNyOGBWQjwjvd2LvwXxQx4l0k9nD57s0IG0wM0f5m5dKkAfbHFg6Pz7yqVhJ9W4b4M9lPysJ6t5nV4nRj1t9jUyf4KiUVu5hOlXbJfd3ozhE7Qf-6TQfYz7YH0y9N9lf1jYcLqHtClvL1P2Ww2sQ8W4Vj9z1uI6r7P4Yf2WQ4fXn7X9W4nEe1Qm0n6J9fQ3vQfM6y2n7m3gQ" alt="Arquitectura Inferno Colombia" />
+</p>
 
 ### Modelo de comunicación
 
-- **FastAPI** orquesta el flujo.
-- **RabbitMQ** desacopla el request del procesamiento pesado de pedido.
-- **Worker** consume eventos y persiste la orden en MySQL.
-- **Redis** guarda el estado temporal del pedido (`PENDING`, `CONFIRMED`, `FAILED`).
+1. Cliente confirma compra en FastAPI.
+2. FastAPI encola evento en RabbitMQ (`orders.create`).
+3. FastAPI marca estado `PENDING` en Redis.
+4. Worker consume la cola y crea orden en MySQL.
+5. Worker actualiza Redis a `CONFIRMED` o `FAILED`.
+6. Cliente consulta `/checkout/status/{request_id}` hasta estado final.
 
 ---
 
-##  Componentes Clave
+##  Componentes del sistema
 
-- `fastapi_app/app/main.py` → API principal + rutas web + endpoint de estado de checkout.
-- `fastapi_app/app/api_products.py` → API REST (`/productos`).
-- `fastapi_app/app/queue.py` → publicación/consumo en RabbitMQ.
-- `fastapi_app/app/worker.py` → procesamiento asíncrono de órdenes.
-- `fastapi_app/app/order_status.py` → estado de órdenes en Redis.
-- `fastapi_app/docker-compose.yml` → levanta Redis + RabbitMQ.
-
----
-
-##  Flujo de Checkout Asíncrono
-
-1. Usuario confirma compra en `/checkout?place=1`.
-2. FastAPI publica mensaje en RabbitMQ (`orders.create`).
-3. FastAPI registra estado en Redis: `order_status:{request_id}=PENDING`.
-4. Front consulta `GET /checkout/status/{request_id}`.
-5. Worker consume mensaje, crea orden en MySQL, limpia carrito.
-6. Worker actualiza estado a `CONFIRMED` (o `FAILED`).
-7. Cliente detecta estado final y redirige a pedidos.
+| Componente | Rol |
+|---|---|
+| `fastapi_app/app/main.py` | API principal, rutas web, checkout y estado |
+| `fastapi_app/app/api_products.py` | Endpoints REST de catálogo |
+| `fastapi_app/app/queue.py` | Publicar/consumir mensajes en RabbitMQ |
+| `fastapi_app/app/worker.py` | Procesamiento asíncrono de pedidos |
+| `fastapi_app/app/order_status.py` | Lectura/escritura del estado en Redis |
+| `fastapi_app/docker-compose.yml` | Levanta Redis y RabbitMQ |
 
 ---
 
-##  Estructura del Proyecto
+##  Flujo de checkout asíncrono
 
 ```text
-Ecommerce-infernocol corte 2/
-├── fastapi_app/
-│   ├── app/
-│   │   ├── main.py
-│   │   ├── api_products.py
-│   │   ├── queue.py
-│   │   ├── worker.py
-│   │   ├── order_status.py
-│   │   ├── db.py
-│   │   ├── models.py
-│   │   ├── settings.py
-│   │   └── templates/
-│   ├── docker-compose.yml
-│   ├── requirements.txt
-│   ├── .env.example
-│   └── README.md
-├── css/ js/ img/ fonts/
-├── store.sql
-└── (archivos PHP originales)
+/checkout?place=1
+   ↓
+FastAPI publica mensaje a RabbitMQ
+   ↓
+Redis guarda order_status:{request_id}=PENDING
+   ↓
+Worker consume cola y procesa pedido en MySQL
+   ↓
+Redis -> CONFIRMED / FAILED
+   ↓
+Cliente consulta /checkout/status/{request_id}
 ```
 
 ---
 
-##  Endpoints Principales
+##  Endpoints principales
 
-### Web
+<details>
+<summary><b>Web</b></summary>
 
 - `GET /` Inicio
 - `GET /shop` Tienda
@@ -124,21 +102,24 @@ Ecommerce-infernocol corte 2/
 - `GET /checkout` Checkout
 - `GET /checkout/status/{request_id}` Estado asíncrono
 
-### API REST
+</details>
+
+<details>
+<summary><b>API REST</b></summary>
 
 - `POST /productos`
 - `GET /productos`
 - `GET /productos/{id}`
 
-Swagger:
+Swagger: `http://127.0.0.1:8000/docs`
 
-- `http://127.0.0.1:8000/docs`
+</details>
 
 ---
 
-##  Instalación y Ejecución
+##  Instalación y ejecución
 
-> Ejecutar desde `fastapi_app/`.
+> Ejecuta todo desde `fastapi_app/`
 
 ### 1) Preparar entorno
 
@@ -160,7 +141,7 @@ Ajusta en `.env`:
 - `DB_HOST`, `DB_USER`, `DB_PASSWORD`, `DB_NAME`
 - `REDIS_HOST`, `REDIS_PORT`
 - `RABBITMQ_HOST`, `RABBITMQ_PORT`
-- (Opcional demo) `ORDER_PROCESSING_DELAY_SECONDS=40`
+- (Opcional demo visual) `ORDER_PROCESSING_DELAY_SECONDS=40`
 
 ### 3) Levantar Redis + RabbitMQ
 
@@ -168,10 +149,7 @@ Ajusta en `.env`:
 docker compose up -d
 ```
 
-RabbitMQ Management:
-
-- `http://localhost:15672`
-- user/pass: `guest` / `guest`
+RabbitMQ Panel: `http://localhost:15672` (`guest/guest`)
 
 ### 4) Ejecutar API y Worker
 
@@ -189,32 +167,22 @@ Terminal B:
 
 ---
 
-##  Demo Rápida
+##  Demo rápida
 
 1. Inicia sesión.
 2. Agrega producto al carrito.
-3. Ve a Checkout y confirma pedido.
-4. Se genera `request_id`.
-5. Consulta en Swagger:
-   - `GET /checkout/status/{request_id}`
+3. Ve a checkout y confirma pedido.
+4. Copia `request_id`.
+5. Consulta en Swagger `GET /checkout/status/{request_id}`.
 6. Observa transición `PENDING` → `CONFIRMED`.
 
 ---
 
 ##  Troubleshooting
 
-### `ModuleNotFoundError: No module named 'app'`
-Ejecuta comandos dentro de `fastapi_app/`.
-
-### `ModuleNotFoundError: No module named 'redis'`
-Usa el Python del venv:
-
-```powershell
-.\.venv\Scripts\python.exe -m pip install -r requirements.txt
-```
-
-### El worker no imprime nada
-Es normal: está esperando mensajes en cola.
+- **`No module named 'app'`**: ejecuta comandos dentro de `fastapi_app/`.
+- **`No module named 'redis'`**: usa `python -m pip install -r requirements.txt` con Python del `.venv`.
+- **Worker “sin logs”**: es normal, está escuchando cola hasta recibir mensajes.
 
 ---
 
@@ -224,3 +192,4 @@ Es normal: está esperando mensajes en cola.
 - **Miguel Angel Villamil Echavarria**
 
 ---
+
