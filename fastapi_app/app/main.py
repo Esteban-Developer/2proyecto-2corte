@@ -7,7 +7,7 @@ from pathlib import Path
 from typing import Any
 
 from fastapi import Depends, FastAPI, Form, Request, UploadFile, File
-from fastapi.responses import HTMLResponse, RedirectResponse
+from fastapi.responses import HTMLResponse, RedirectResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from sqlalchemy.orm import Session
@@ -25,6 +25,8 @@ from .utils import (
     set_flash,
 )
 from .api_products import router as productos_router
+from .order_status import get_order_status, set_order_status
+from .queue import enqueue_order_request, QueueConnectionError
 
 
 settings = get_settings()
@@ -264,12 +266,17 @@ def cart_remove(request: Request, product_id: int, db: Session = Depends(get_db)
 
 
 @app.get("/checkout", response_class=HTMLResponse)
-def checkout(request: Request, db: Session = Depends(get_db), place: int | None = None) -> Any:
+def checkout(
+    request: Request,
+    db: Session = Depends(get_db),
+    place: int | None = None,
+    request_id: str | None = None,
+) -> Any:
     ctx = build_base_context(request, db, active="Checkout")
     customer_email = ctx["session_customer_email"]
 
     if not is_logged_in(customer_email):
-        set_flash(request, "Inicia sesión para finalizar compra.")
+        set_flash(request, "Inicia sesi?n para finalizar compra.")
         return _redirect("/login")
 
     customer = db.query(Customer).filter(Customer.customer_email == customer_email).first()
@@ -281,26 +288,21 @@ def checkout(request: Request, db: Session = Depends(get_db), place: int | None 
     items = db.query(CartItem).filter(CartItem.c_id == customer_email).all()
     if place is not None:
         if not items:
-            set_flash(request, "No hay artículos en el carrito.")
+            set_flash(request, "No hay art?culos en el carrito.")
             return _redirect("/cart")
 
-        product_ids = [i.products_id for i in items]
-        products = db.query(Product).filter(Product.products_id.in_(product_ids)).all()
-        price_by_id = {p.products_id: int(p.product_price) for p in products}
+        payload = {
+            "customer_email": customer_email,
+            "customer_id": int(customer.customer_id),
+        }
+        try:
+            created_request_id = enqueue_order_request(payload)
+        except QueueConnectionError:
+            set_flash(request, "RabbitMQ no disponible. Intenta nuevamente en unos segundos.")
+            return _redirect("/checkout")
 
-        total_q = 0
-        final_price = 0
-        for i in items:
-            total_q += int(i.qty)
-            final_price += int(price_by_id.get(i.products_id, 0)) * int(i.qty)
-
-        order = Order(order_qty=total_q, order_price=final_price, c_id=int(customer.customer_id))
-        db.add(order)
-        db.query(CartItem).filter(CartItem.c_id == customer_email).delete()
-        db.commit()
-
-        set_flash(request, "Pedido realizado con éxito. ¡Gracias por tu compra!")
-        return _redirect("/account?orders=1")
+        set_order_status(created_request_id, "PENDING")
+        return _redirect(f"/checkout?request_id={created_request_id}")
 
     product_ids = [i.products_id for i in items]
     products = db.query(Product).filter(Product.products_id.in_(product_ids)).all() if product_ids else []
@@ -316,8 +318,26 @@ def checkout(request: Request, db: Session = Depends(get_db), place: int | None 
         total += line_total
         order_lines.append({"name": p.product_title, "qty": int(i.qty), "line_total": line_total})
 
-    ctx.update({"order_lines": order_lines, "subtotal": total, "total": total})
+    checkout_status = None
+    if request_id:
+        checkout_status = get_order_status(request_id) or "PENDING"
+
+    ctx.update(
+        {
+            "order_lines": order_lines,
+            "subtotal": total,
+            "total": total,
+            "request_id": request_id,
+            "checkout_status": checkout_status,
+        }
+    )
     return templates.TemplateResponse("checkout.html", ctx)
+
+
+@app.get("/checkout/status/{request_id}")
+def checkout_status(request_id: str) -> JSONResponse:
+    status = get_order_status(request_id) or "NOT_FOUND"
+    return JSONResponse({"request_id": request_id, "status": status})
 
 
 @app.get("/login", response_class=HTMLResponse)

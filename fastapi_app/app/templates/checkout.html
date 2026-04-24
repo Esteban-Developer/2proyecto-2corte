@@ -1,4 +1,4 @@
-{% extends "base.html" %}
+﻿{% extends "base.html" %}
 
 {% block content %}
 
@@ -23,6 +23,19 @@
         <div class="checkout-content">
           <a href="/shop" class="content-btn">Seguir Comprando</a>
         </div>
+
+        {% if request_id %}
+        <div class="card" style="margin-bottom:20px;">
+          <div class="card-body" style="text-align:center;">
+            <h5 style="font-weight:600">Pedido en procesamiento asíncrono</h5>
+            <p style="margin:8px 0 0 0;">ID de solicitud: <code>{{ request_id }}</code></p>
+            <p id="status-text" style="margin-top:10px; color:#fe4231; font-weight:600;">
+              Estado actual: {{ checkout_status }}
+            </p>
+          </div>
+        </div>
+        {% endif %}
+
         <div class="place-order">
           <h4>Tu Pedido</h4>
           <div class="order-total">
@@ -52,3 +65,37 @@
 
 {% endblock %}
 
+{% block extra_js %}
+{% if request_id %}
+<script>
+(function () {
+  const requestId = {{ request_id|tojson }};
+  const statusText = document.getElementById("status-text");
+  if (!requestId || !statusText) return;
+
+  const poll = async () => {
+    try {
+      const res = await fetch(`/checkout/status/${requestId}`);
+      if (!res.ok) return;
+      const data = await res.json();
+      statusText.textContent = `Estado actual: ${data.status}`;
+
+      if (data.status === "CONFIRMED") {
+        window.location.href = "/account?orders=1";
+        return;
+      }
+      if (data.status === "FAILED") {
+        statusText.textContent = "Estado actual: FAILED (revisa tu carrito e intenta de nuevo)";
+        return;
+      }
+      setTimeout(poll, 2000);
+    } catch (e) {
+      setTimeout(poll, 3000);
+    }
+  };
+
+  setTimeout(poll, 1200);
+})();
+</script>
+{% endif %}
+{% endblock %}
