@@ -40,14 +40,6 @@
 
 ---
 
-##  Arquitectura
-
-> En GitHub a veces Mermaid no renderiza según configuración. Por eso aquí va como **imagen estática**, para que siempre se vea.
-
-<p align="center">
-  <img src="https://mermaid.ink/img/pako:eNp1kk1PwzAMhv9KlBOhLQSHhI3Lsu2M0wRw4IY4bhM2qiq7sm1eUfXfSUrbbjA8Qnd8fPy29xyMM4I1qeBo7De4BaMFdM6qcQfH9HJYIPqRxZ6z3f2MlpV4FVhSm2Jv1mIia0K6WyXQn2M0OQ1xZo2q0ON5n0kzb8xjkrQpp3Px8hcjXf8fI2mW9M8IGVNyOGBWQjwjvd2LvwXxQx4l0k9nD57s0IG0wM0f5m5dKkAfbHFg6Pz7yqVhJ9W4b4M9lPysJ6t5nV4nRj1t9jUyf4KiUVu5hOlXbJfd3ozhE7Qf-6TQfYz7YH0y9N9lf1jYcLqHtClvL1P2Ww2sQ8W4Vj9z1uI6r7P4Yf2WQ4fXn7X9W4nEe1Qm0n6J9fQ3vQfM6y2n7m3gQ" alt="Arquitectura Inferno Colombia" />
-</p>
-
 ### Modelo de comunicación
 
 1. Cliente confirma compra en FastAPI.
