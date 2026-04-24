@@ -185,3 +185,6 @@ Terminal B:
 
 ---
 
+<p align="center">
+  <img src="https://capsule-render.vercel.app/api?type=waving&color=0:c084fc,100:7c3aed&height=120&section=footer"/>
+</p>
